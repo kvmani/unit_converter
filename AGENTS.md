@@ -1,5 +1,6 @@
 # AGENTS.md — Execution Playbook for Codegen Agent
-
+## For API requirement or how to be able to plug into ml_server website as a plugin refer to repo: https://github.com/kvmani/ml_server
+## Also refer to repo:https://github.com/kvmani/pdf_tools for code organization and expections for being able to be pluged into the ml_server website as a plugin.
 ## Objective
 Implement a **privacy‑first**, **air‑gapped** Unit Converter repo `units_converter` with:
 - Core conversion engine (`Converter`)
