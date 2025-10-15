@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Units Converter – Dev UX</title>
+    <link rel="stylesheet" href="/ui_dev/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Units Converter</h1>
+      <p class="tagline">Air-gapped testing interface</p>
+    </header>
+    <main class="layout" role="main">
+      <section class="panel panel-left" aria-labelledby="family-heading">
+        <h2 id="family-heading">Families &amp; Presets</h2>
+        <div class="family-controls">
+          <label class="visually-hidden" for="family-select">Unit family</label>
+          <select id="family-select" class="control"></select>
+          <ul id="preset-list" class="preset-list" aria-live="polite"></ul>
+        </div>
+      </section>
+      <section class="panel panel-center" aria-labelledby="convert-heading">
+        <h2 id="convert-heading">Convert</h2>
+        <form id="convert-form" class="convert-form">
+          <div class="field">
+            <label for="from-value">Value</label>
+            <input id="from-value" name="value" maxlength="64" autocomplete="off" />
+          </div>
+          <div class="field field-inline">
+            <div>
+              <label for="from-unit">From unit</label>
+              <input id="from-unit" name="from" autocomplete="off" />
+            </div>
+            <button id="swap-button" type="button" title="Swap units" aria-label="Swap units">⟷</button>
+            <div>
+              <label for="to-unit">To unit</label>
+              <input id="to-unit" name="to" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field field-inline">
+            <div>
+              <label for="mode-select">Mode</label>
+              <select id="mode-select" name="mode">
+                <option value="absolute">Absolute</option>
+                <option value="interval">Interval</option>
+              </select>
+            </div>
+            <div>
+              <label for="notation-select">Notation</label>
+              <select id="notation-select" name="notation">
+                <option value="auto">Auto</option>
+                <option value="engineering">Engineering</option>
+                <option value="scientific">Scientific</option>
+              </select>
+            </div>
+            <div>
+              <label for="sig-figs">Sig figs</label>
+              <input id="sig-figs" name="sig_figs" type="number" min="1" />
+            </div>
+            <div>
+              <label for="decimals">Decimals</label>
+              <input id="decimals" name="decimals" type="number" min="0" />
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" id="convert-button">Convert</button>
+            <span id="status" role="status" aria-live="polite"></span>
+          </div>
+          <output id="result-display" class="result" for="from-value from-unit to-unit"></output>
+          <div class="copy-buttons" hidden>
+            <button type="button" data-copy="value">Copy value</button>
+            <button type="button" data-copy="full">Copy value + unit</button>
+            <button type="button" data-copy="latex">Copy LaTeX</button>
+          </div>
+        </form>
+      </section>
+      <section class="panel panel-right" aria-labelledby="history-heading">
+        <h2 id="history-heading">Session History</h2>
+        <div class="history-controls">
+          <button type="button" id="clear-history">Clear history</button>
+        </div>
+        <ul id="history-list" class="history-list" aria-live="polite"></ul>
+        <h3>Favorites</h3>
+        <ul id="favorites-list" class="history-list" aria-live="polite"></ul>
+      </section>
+    </main>
+    <template id="history-item-template">
+      <li>
+        <button class="history-entry" type="button"></button>
+        <div class="history-actions">
+          <button type="button" data-action="favorite" aria-label="Add to favorites">★</button>
+          <button type="button" data-action="copy">Copy</button>
+        </div>
+      </li>
+    </template>
+    <template id="favorite-item-template">
+      <li>
+        <button class="history-entry" type="button"></button>
+        <div class="history-actions">
+          <button type="button" data-action="remove">Remove</button>
+        </div>
+      </li>
+    </template>
+    <script type="module" src="/ui_dev/app.js"></script>
+  </body>
+</html>

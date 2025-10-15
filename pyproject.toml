@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "units_converter"
+version = "0.1.0"
+description = "Air-gapped, privacy-first unit conversion engine with API and test UX"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Unit Converter Team"}]
+requires-python = ">=3.10"
+dependencies = [
+    "Flask==2.3.3",
+    "pint==0.23",
+    "pydantic==1.10.13"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==7.4.3",
+    "hypothesis==6.88.3",
+    "requests==2.31.0"
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.units_converter]
+default_port = 5007
+
+[tool.setuptools.packages.find]
+include = ["units_converter*"]
