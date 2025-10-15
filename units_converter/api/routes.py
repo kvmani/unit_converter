@@ -125,4 +125,10 @@ def post_batch_convert():
         converted = parser.convert_csv(text, _converter, options_model.dict())
     except parser.BatchConversionError as exc:
         return error_response("BAD_INPUT", str(exc), 400)
+    except InvalidUnitError as exc:
+        return error_response("INVALID_UNIT", str(exc), 400)
+    except DimensionMismatchError as exc:
+        return error_response("DIMENSION_MISMATCH", str(exc), 400)
+    except BadInputError as exc:
+        return error_response("BAD_INPUT", str(exc), 400)
     return exporter.csv_response(converted)
