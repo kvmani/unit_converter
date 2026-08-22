@@ -14,3 +14,16 @@ def test_expression_conversion():
         response = client.post('/api/expressions', json={'expression': '2 kg * 9.81 m/s^2 to N'})
     assert response.status_code == 200
     assert abs(response.get_json()['result'] - 19.62) < 1e-8
+
+
+def test_families_units_and_error_contracts():
+    with app.test_client() as client:
+        assert client.get('/').status_code == 200
+        assert client.get('/api/families').get_json()['families']['Length']
+        assert client.get('/api/units/Length').status_code == 200
+        assert client.get('/api/units/Unknown').status_code == 404
+        assert client.post('/api/convert', json={'value': 1, 'from_unit': 'meter', 'to_unit': 'not-a-unit'}).status_code == 400
+        assert client.post('/api/convert', json={}).status_code == 400
+        assert client.post('/api/expressions', json={'expression': '10 meter', 'target': 'centimeter'}).get_json()['result'] == 1000
+        assert client.post('/api/expressions', json={}).status_code == 400
+        assert client.post('/api/expressions', json={'expression': 'not a quantity'}).status_code == 400

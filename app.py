@@ -74,5 +74,5 @@ def expressions():
         return jsonify({"ok": False, "error": str(error)}), 400
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(host="127.0.0.1", port=5065, debug=False)
