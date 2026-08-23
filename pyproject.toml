@@ -4,7 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unit-converter"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local engineering unit conversion service"
 requires-python = ">=3.9"
-dependencies = ["Flask==3.0.2", "Pint>=0.23,<1"]
+dependencies = ["Flask==3.0.2", "Pint>=0.23,<1", "waitress>=3.0,<4"]
+
+[project.scripts]
+unit-converter = "unit_converter_service.app:main"
+
+[tool.setuptools.package-data]
+unit_converter_service = ["templates/*.html", "static/**/*"]

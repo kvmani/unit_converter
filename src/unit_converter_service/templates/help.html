@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unit Converter · Scientific Help</title>
+<style>
+body{margin:0;background:#f5f8f2;color:#284629;font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1050px;margin:auto;padding:45px 24px}
+a{color:#456b43;font-weight:700}
+.eyebrow{color:#b84d45;font-size:12px;font-weight:800;letter-spacing:.15em}
+h1{font-size:clamp(38px,6vw,64px);line-height:1;letter-spacing:-.04em;margin:12px 0 24px}
+h2{font-size:1.15rem;margin:0 0 14px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.hero img{width:100%;border-radius:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+.card{background:#fff;border:1px solid #cbd9c6;border-radius:16px;padding:22px}
+dt{font-weight:800}
+dd{margin:3px 0 15px;color:#627060}
+/* Equations are typeset by the vendored MathJax bundle in static/vendor/mathjax.
+   The raw TeX is hidden only while .mathjax-pending is set by the config script,
+   so a missing bundle degrades to readable source rather than an empty box. */
+.eq{margin:16px 0 8px;padding:14px 12px;border-radius:10px;background:#e8f2e4;border:1px solid #d6e5d1;
+    color:#3d5f3b;text-align:center;overflow-x:auto;overflow-y:hidden;
+    font:1.05rem/1.5 'Latin Modern Math','Cambria Math',Georgia,serif}
+.eq mjx-container{margin:0!important;max-width:100%}
+.mathjax-pending .eq,.mathjax-pending .m{visibility:hidden}
+.note{color:#627060;margin:0 0 18px}
+.where{margin:14px 0 0;padding-top:12px;border-top:1px dashed #cbd9c6}
+.where dt{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7d8f78}
+.where dd{display:flex;gap:12px;align-items:baseline;margin:8px 0 0}
+.where .m{min-width:3.6rem}
+.where span:last-child{font-size:.9rem}
+@media(max-width:750px){.hero,.grid{grid-template-columns:1fr}}
+</style>
+<script src="/static/mathjax-config.js"></script>
+<script defer id="MathJax-script" src="/static/vendor/mathjax/tex-chtml-full.js"></script>
+</head>
+<body>
+<main>
+<a href="/">← Converter</a>
+
+<section class="hero">
+  <div>
+    <p class="eyebrow">SCIENTIFIC GUIDE</p>
+    <h1>Unit conversion</h1>
+    <p>Parse a physical quantity, resolve its unit definition, verify that source and target have the same dimensionality, then apply the registry's scale and any required offset.</p>
+  </div>
+  <img src="/static/unit-conversion-workflow.svg" alt="Dimension-aware unit conversion workflow">
+</section>
+
+<section class="grid">
+  <article class="card">
+    <h2>Main equations</h2>
+
+    <div class="eq mathjax" role="math" aria-label="x_B equals x_A times s_A over s_B">\[ x_{B} \;=\; x_{A}\,\frac{s_{A}}{s_{B}} \]</div>
+    <p class="note">Multiplicative units share a base-unit bridge, so the same physical quantity is recovered exactly.</p>
+
+    <div class="eq mathjax" role="math" aria-label="T in kelvin equals T in degrees Celsius plus 273.15">\[ T_{\mathrm{K}} \;=\; T_{^{\circ}\mathrm{C}} + 273.15 \]</div>
+    <p class="note">Absolute temperature is affine. Temperature <em>intervals</em> use the scale only, with no offset.</p>
+
+    <div class="eq mathjax" role="math" aria-label="the dimension of the source quantity equals the dimension of the target quantity, expressed as powers of the base dimensions">\[ \dim\bigl(q_{\text{source}}\bigr) \;=\; \dim\bigl(q_{\text{target}}\bigr) \;=\; \mathsf{L}^{\alpha}\mathsf{M}^{\beta}\mathsf{T}^{\gamma}\cdots \]</div>
+    <p class="note">A conversion is valid only when both dimensionalities match exactly.</p>
+
+    <dl class="where">
+      <dt>where</dt>
+      <dd><span class="m mathjax">\(x_{A},\,x_{B}\)</span><span>magnitude in the source and target unit</span></dd>
+      <dd><span class="m mathjax">\(s_{A},\,s_{B}\)</span><span>scale of each unit relative to the base unit</span></dd>
+      <dd><span class="m mathjax">\(\mathsf{L},\mathsf{M},\mathsf{T}\)</span><span>base dimensions of length, mass, and time</span></dd>
+      <dd><span class="m mathjax">\(\alpha,\beta,\gamma\)</span><span>integer exponents of each base dimension</span></dd>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Critical inputs</h2>
+    <dl>
+      <dt>Magnitude</dt><dd>The numeric value being transformed.</dd>
+      <dt>Source and target</dt><dd>Define dimensionality, scale, and possible offsets.</dd>
+      <dt>Absolute or interval</dt><dd>Prevents a temperature difference from being treated as an absolute temperature.</dd>
+      <dt>Compound expression</dt><dd>Preserves dimensional algebra through multiplication and division.</dd>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Failure modes</h2>
+    <ul>
+      <li>Dimensionally incompatible conversions are rejected.</li>
+      <li>Ambiguous abbreviations should be replaced by explicit unit names.</li>
+      <li>A correct conversion cannot validate the measurement itself.</li>
+    </ul>
+    <h2 style="margin-top:22px">Privacy</h2>
+    <p class="note">This service runs on the office intranet. Conversions are computed in memory for the duration of your request, nothing is stored, and no personal information is collected.</p>
+  </article>
+
+  <article class="card">
+    <h2>Worked checks</h2>
+    <ul>
+      <li><span class="m mathjax">\(1\,\mathrm{MPa} = 1\,\mathrm{N/mm^{2}}\)</span></li>
+      <li><span class="m mathjax">\(25\,^{\circ}\mathrm{C} = 298.15\,\mathrm{K}\)</span> (absolute)</li>
+      <li><span class="m mathjax">\(\Delta 25\,^{\circ}\mathrm{C} = 25\,\mathrm{K}\)</span> (interval)</li>
+      <li><span class="m mathjax">\(1\,\mu\Omega\!\cdot\!\mathrm{cm} = 10^{-8}\,\Omega\!\cdot\!\mathrm{m}\)</span></li>
+    </ul>
+  </article>
+</section>
+</main>
+</body>
+</html>

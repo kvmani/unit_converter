@@ -27,3 +27,24 @@ def test_families_units_and_error_contracts():
         assert client.post('/api/expressions', json={'expression': '10 meter', 'target': 'centimeter'}).get_json()['result'] == 1000
         assert client.post('/api/expressions', json={}).status_code == 400
         assert client.post('/api/expressions', json={'expression': 'not a quantity'}).status_code == 400
+
+
+def test_v1_contract_temperature_modes_and_help():
+    with app.test_client() as client:
+        assert client.get('/help').status_code == 200
+        assert 'Length' in client.get('/api/v1/units/families').get_json()['families']
+        assert client.get('/api/v1/units/units?family=pressure').status_code == 200
+        absolute = client.post('/api/v1/units/convert', json={
+            'value': 25, 'from': 'degC', 'to': 'kelvin', 'mode': 'absolute'
+        })
+        interval = client.post('/api/v1/units/convert', json={
+            'value': 25, 'from': 'degC', 'to': 'kelvin', 'mode': 'interval'
+        })
+        mismatch = client.post('/api/v1/units/convert', json={
+            'value': 1, 'from': 'meter', 'to': 'second'
+        })
+    assert absolute.get_json()['result'] == 298.15
+    assert interval.get_json()['result'] == 25
+    assert mismatch.status_code == 400
+    assert mismatch.get_json()['error_code'] == 'DIMENSION_MISMATCH'
+    assert absolute.headers['X-Content-Type-Options'] == 'nosniff'
