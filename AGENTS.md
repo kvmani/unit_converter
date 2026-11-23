@@ -1,112 +1,108 @@
-# AGENTS.md — Execution Playbook for Codegen Agent
-## For API requirement or how to be able to plug into ml_server website as a plugin refer to repo: https://github.com/kvmani/ml_server
-## Also refer to repo:https://github.com/kvmani/pdf_tools for code organization and expections for being able to be pluged into the ml_server website as a plugin.
-## Objective
-Implement a **privacy‑first**, **air‑gapped** Unit Converter repo `units_converter` with:
-- Core conversion engine (`Converter`)
-- Flask API (`/api/v1/units/*`)
-- Temporary 3‑panel UX (static) for testing
-- Comprehensive tests
+# AGENTS.md — Unit Converter
 
-## Repository Tasks (Checklist)
-- [ ] Scaffold `pyproject.toml`, `units_converter/`, `tests/`, `static/`, `scripts/`.
-- [ ] Engine: Pint registry + aliases + expression parsing + interval temperature logic.
-- [ ] API: Flask blueprint with routes, JSON validation, error handling, limits.
-- [ ] Static UX: 3‑panel HTML/CSS/JS; keyboard navigation; copy buttons; swap units.
-- [ ] Tests: pytest + hypothesis; API schema tests; 
-- [ ] Docs: README with usage & ml_server integration; this AGENTS.md.
-- [ ] License: MIT.
+Privacy-first, air-gapped engineering unit converter: a Pint-backed Flask service with a browser
+UI and scientific help page, served by Waitress on `127.0.0.1:5065`. It runs on its own; the
+`ml_server` portal links to it and `ml_server_deploy` ships it. This file is the operating contract
+for every coding agent (Codex, Claude, Gemini, …) and human contributor; it is the only
+agent-instruction file in the repository.
 
-## Directory Layout (Target)
+**Order of authority:** the owner's instruction for the task → this file →
+[docs/SPECIFICATION.md](docs/SPECIFICATION.md) → [README.md](README.md) → code comments.
+
+## Cardinal rules (owner-mandated, every repository)
+
+1. **Fetch before you change anything.** Start every task with
+   `git fetch origin && git pull --rebase --autostash origin main`. Several people and agents push
+   to this repository; never build on a stale checkout.
+2. **Work on `main` only.** Commit and push directly to `main` unless the owner names another
+   branch for the task. No feature branches or pull requests by default. Fetch again before
+   pushing; if the push is rejected, `git pull --rebase origin main`, rerun the affected tests,
+   then push. Never force-push or rewrite published history.
+3. **Keep the progress ledger current:** [`docs/PROGRESS.md`](docs/PROGRESS.md). Before coding, add (or claim)
+   the task entry: goal, plan, who is working on it, date. After each meaningful step record what
+   was done, the commit, test evidence, decisions, blockers and the next step. Commit the ledger
+   with the work it describes. A new session must be able to resume from the ledger and git
+   history alone, without the chat that started the work.
+4. **Targeted tests for ordinary changes.** Run only the tests that cover what you touched (see
+   [Tests](#tests)). Run the full suite only when preparing a release or when the owner asks.
+5. **CI runs only on request.** GitHub Actions workflows start by `workflow_dispatch` only;
+   tag-triggered release workflows are the single exception. Never add push, pull-request or
+   schedule triggers, and never start a workflow unless the owner asks.
+6. **Be honest.** Never report a check as passed unless you ran it and saw it pass; record skipped
+   checks and the reason. Never weaken, skip or delete a test to make it pass.
+7. **Keep git clean.** Commit sources and canonical assets only: no secrets, real personal data,
+   virtual environments, caches, logs or build output.
+
+The cardinal rules decide *how work is done* (sync, branch, ledger, test scope, CI). The project
+rules in this file decide *what this repository must achieve and protect*; nothing generic here
+relaxes them. If a project rule and a cardinal rule genuinely conflict, stop and ask the owner.
+
+## Project rules
+
+- **The specification is the contract.** API routes, error codes, unit semantics, limits and the
+  minimum test matrix are in [docs/SPECIFICATION.md](docs/SPECIFICATION.md). Change it only
+  deliberately, together with code, tests, help and CHANGELOG.
+- **Keep the legacy `/api/*` aliases and `/api/health` working**; the portal and suite rely on them.
+- **Absolute and interval temperatures are different modes.** Never convert a temperature
+  difference with an offset formula.
+- **Privacy and air gap:** no network traffic beyond localhost, no persistent logging of input, no
+  cookies or browser storage; vendored assets only.
+- **Plugin conventions:** for portal integration follow `kvmani/ml_server` (API expectations) and
+  `kvmani/pdf_tools` (code organisation) — read them only when the task touches integration.
+- Commit subjects use conventional prefixes (`feat:`, `fix:`, `docs:`, `test:`); keep diffs small.
+- **Release bookkeeping:** `VERSION` in `app.py`, `pyproject.toml`, README release notes and
+  `CHANGELOG.md` move together.
+
+## Quality bar
+
+- The smallest change that fully solves the task, following existing patterns; no dead code.
+- Reject bad input with the documented `error_code` and a clear message; never return a silently
+  wrong value.
+- Type hints and docstrings on public functions (purpose, parameters with units, returns, errors).
+- Every behaviour change ships with a test from the spec's matrix, including the failure case.
+- User-visible changes update `templates/help.html`, README and CHANGELOG in the same commit.
+
+## How to work
+
+1. Sync (cardinal rule 1) and read the ledger.
+2. Read the relevant section of the specification, the code you will change and its tests.
+3. Plan files, tests and docs; note them in the ledger. Implement in small verified steps,
+   committing, pushing and updating the ledger after each.
+
+## Tests
+
+```bash
+pip install -r requirements.txt -r requirements-test.txt
+python -m pytest tests/test_app.py -q -k <keyword>   # targeted (ordinary changes)
+python -m pytest                                      # full suite (release or on request)
 ```
-units_converter/
-  units_converter/
-    __init__.py
-    config.py
-    engine/
-      __init__.py
-      converter.py
-      registry_data.py
-    api/
-      __init__.py
-      app.py            # create_app()
-      routes.py         # Blueprint
-      schemas.py
-      errors.py
-    batch/
-      __init__.py
-      parser.py
-      exporter.py
-    ui_dev/
-      index.html
-      styles.css
-      app.js
-  tests/
-    test_engine_basic.py
-    test_engine_temperature.py
-    test_engine_compound.py
-    test_api_convert.py
-    test_api_expression.py
-    test_api_batch_csv.py
-    test_ui_smoke.py
-  scripts/
-    dev_server.sh
-  pyproject.toml
-  README.md
-  AGENTS.md
-  LICENSE
+
+| You changed | Run |
+| --- | --- |
+| conversion, expressions, routes, headers in `app.py` | `tests/test_app.py` (narrow with `-k`) |
+| `templates/help.html`, MathJax config | `tests/test_help_mathematics.py` |
+| UI (`static/app.js`, `templates/index.html`) | `tests/test_app.py -k ui` if present, plus a manual check in the browser |
+
+## Run
+
+```bash
+python -m pip install -e .
+unit-converter          # http://127.0.0.1:5065 ; verify /api/health
 ```
 
-## API Contract (Authoritative)
-**Base**: `/api/v1/units`
+## Definition of done
 
-- `GET /families` → 200 `{ "families": [...] }`
-- `GET /units?family=pressure` → 200 `{ "units": [{ "symbol":"MPa","aliases":["N/mm^2"],"dimension":"pressure" }, ...] }`
-- `POST /convert` → 200 `{ "ok": true, "result": <float>, "unit": "<symbol>", "text": "<pretty>" }`
-  - Body: `value: number|string`, `from: string`, `to: string`, `mode: "absolute"|"interval"`, optional `sig_figs`, `decimals`, `notation`.
-- `POST /convert/expression` → 200 `{ "ok": true, "result": <float>, "unit": "<symbol>" }`
-  - Body: `expression: string` (e.g., `"200 MPa * 10 mm^2 to N·mm"`)
-- `POST /batch/convert` (multipart form)
-  - Fields: `file`, `options` (JSON). Returns CSV/XLSX stream with `Content-Disposition: attachment`.
+- [ ] Behaviour matches the specification; targeted tests pass and were run.
+- [ ] Help page, README and CHANGELOG updated where behaviour is user-visible.
+- [ ] Legacy routes and `/api/health` still respond; no external requests introduced.
+- [ ] Ledger updated; committed and pushed to `main`.
 
-**Errors**: 4xx with `{ "ok": false, "error_code": "INVALID_UNIT|DIMENSION_MISMATCH|LIMIT_EXCEEDED|BAD_INPUT", "message": "..." }`
+## Map
 
-## Limits & Security
-
-- Disable MIME sniffing; set `X-Content-Type-Options: nosniff`.
-- No persistent logging; no cookies/localStorage/IndexedDB.
-
-## Unit Semantics
-- Use Pint with custom registry:
-  - Aliases: Å=angstrom=1e-10 m; micron=micrometer=µm; ksi=kilopound_force_per_square_inch; μΩ·cm; MPa; GPa.
-  - Temperature: `mode="interval"` maps Δ°C <-> K exactly, not offset formulas.
-- Expression grammar: `<scalar> <unit> [op <scalar> <unit>]* "to" <unit>`; ops: `*`, `/`. Perform with Pint Quantity operations; reject invalid dimensions.
-
-## Testing Matrix
-- Engine:
-  - MPa↔N/mm² (1 MPa == 1 N/mm²)
-  - MPa↔ksi (~145.038 psi/MPa)
-  - Å↔nm↔m
-  - kJ/mol ↔ eV (use NA and e charge constants built into Pint)
-  - μΩ·cm ↔ Ω·m (1 μΩ·cm = 1e-8 Ω·m)
-  - W/m·K round‑trips
-  - Pa·s ↔ cP (1 cP = 1e-3 Pa·s)
-  - m²/s (diffusivity) identity
-  - Temperature: 25°C ↔ 298.15 K absolute; Δ25°C ↔ 25 K interval
-  - Dimension mismatch raises clean error
-- API:
-  - JSON schema validation
-  - 415 for wrong MIME, 413 for over limits
-  - Batch CSV round‑trip (headers with `[unit]`)
-- UI smoke:
-  - Load index.html; no external requests; basic interactions callable.
-
-## Done Definition
-- `scripts/dev_server.sh` runs Flask on `http://127.0.0.1:5007/` and serves `/ui_dev/index.html`.
-- `pytest -q` passes locally.
-- README shows examples and curl snippets.
-- No network traffic outside localhost (grep sources).
-
-## Commit Style
-- Conventional commits (`feat:`, `fix:`, `docs:`, `test:`).
-- Small, reviewable diffs.
+| Need | Read |
+| --- | --- |
+| API, error codes, unit semantics, limits, test matrix | [docs/SPECIFICATION.md](docs/SPECIFICATION.md) |
+| Install, deployment modes, release notes | [README.md](README.md) |
+| Version history | [CHANGELOG.md](CHANGELOG.md) |
+| Original scaffold plan (historical only) | [docs/history/original_codegen_playbook.md](docs/history/original_codegen_playbook.md) |
+| Current work and history | [docs/PROGRESS.md](docs/PROGRESS.md) |
